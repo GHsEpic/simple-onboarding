@@ -207,6 +207,11 @@ marimo/_lsp/
 __marimo__/
 
 #Pivate files
-Gesellschaftsvertrag.txt
+Gesellschaftsvertrag.pdf
 credentials.json
 token.json
+openai_token.txt
+playground.py
+google_token.json
+app/credentials/*
+!credentials/

@@ -1,20 +1,4 @@
-from fastapi import Request
-from logging import getLogger
-
-class AutoLogger:
-    """Middleware for automatic logging of requests and responses."""
-    def __init__(self, name: str) -> None:
-        self.logger = getLogger(name)
-
-    def __call__(self, content) -> None:
-        """Log the content of the request or response."""
-        if isinstance(content, Request):
-            self.logger.info(f"Request: {content.method} {content.url}")
-        elif isinstance(content, str):
-            self.logger.info(content)
-        else:
-            self.logger.info(f"Log: {content}")
-    
+import json
 
 def format_duns(duns) -> tuple[bool, str]:
     """Format DUNS number to XX-XXX-XXXX format if possible."""
@@ -35,3 +19,19 @@ def validate_duns_format(duns: str) -> bool:    # Validate DUNS number format, p
     if not duns.replace("-", "").isdigit():     # DUNS contains non-digit characters
         return False
     return True
+
+def load_key(file_path: str) -> str:
+    """Load a key from a file."""
+    try:
+        with open(file_path, 'r') as file:
+            data = file.read().strip()
+        if file_path.endswith('.json'):
+            return (True, json.loads(data))  # Return JSON data as a dictionary
+        else:
+            return (True, data)
+    except FileNotFoundError:
+        with open(file_path, 'w') as file:
+            file.write("#Replace with your key")
+        return (False, f"File not found: {file_path}")
+    except Exception as e:
+        return (False, f"Error reading file: {file_path}, Error: {str(e)}")
