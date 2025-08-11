@@ -15,12 +15,14 @@ class CLIENTS:
         available = True
         message = "Accessible"
     class openai:
-        available = False
+        available = True
         message = "No tokens"
 
 
 
 class CREDENTIALS:
+    dnb_token, google_credentials, google_token, openai_token = None, None, None, None
+    
     if CLIENTS.dnb.available:
         success, _ = load_key("credentials/dnb_token.txt")
     
@@ -42,7 +44,7 @@ class CREDENTIALS:
         if success:
             google_token = _
         else:
-            CLIENTS.google.available = False
+            #CLIENTS.google.available = False
             CLIENTS.google.message = _
     
     if CLIENTS.openai.available:
@@ -52,3 +54,44 @@ class CREDENTIALS:
         else:
             CLIENTS.openai.available = False
             CLIENTS.openai.message = _
+
+
+OPENAI_JSON_SCHEMA = {
+                "type": "json_schema",  # Changed back to json_schema
+                "json_schema": {  # Added json_schema key
+                    "name": "test",
+                    "schema": {
+                        "type": "object",
+                        "additionalProperties": False,  # Added this line
+                        "properties": {
+                            "success": {
+                                "type": "boolean"
+                            },
+                            "data": {
+                                "type": "object",
+                                "additionalProperties": False,  # Added this line
+                                "properties": {
+                                    "company_name": {"type": "string"},
+                                    "founding_date": {"type": "string"},
+                                    "shareholders": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "additionalProperties": False,  # Added this line
+                                            "properties": {
+                                                "name": {"type": "string"},
+                                                "shares": {"type": "string"},
+                                                "date_of_birth": {"type": "string"},
+                                                "phone": {"type": "string"}
+                                            },
+                                            "required": ["name", "shares", "date_of_birth", "phone"]
+                                    }
+                                }
+                            },
+                            "required": ["company_name", "founding_date", "shareholders"]
+                        }
+                    },
+                    "required": ["success", "data"]
+                    }
+                }
+            }

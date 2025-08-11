@@ -1,16 +1,38 @@
 from fastapi import Request
-from logging import getLogger
+from logging import getLogger, Formatter, StreamHandler
 
+# ANSI escape codes for colors
+COLORS = {
+    'DEBUG': '\033[94m',   # Blue
+    'INFO': '\033[92m',    # Green
+    'WARNING': '\033[93m', # Yellow
+    'ERROR': '\033[91m',   # Red
+    'CRITICAL': '\033[95m' # Magenta
+}
+RESET = '\033[0m'
+
+class ColorFormatter(Formatter):
+    def format(self, record):
+        log_color = COLORS.get(record.levelname, RESET)
+        message = super().format(record)
+        return f"{log_color}{message}{RESET}"
+    
 class AutoLogger:
     """Middleware for automatic logging of requests and responses."""
     def __init__(self, app, name: str) -> None:
         self.app = app
         self.logger = getLogger(name)
+        self.logger.setLevel("DEBUG")
 
-        @self.app.middleware("https")
-        @self.app.middleware("http")
-        async def log_request(request: Request, call_next):
-            self.logger.info(f"Request: {request.method} {request.url}")
-            response = await call_next(request)
-            self.logger.info(f"Response: {response.status_code}")
-            return response
+        console_handler = StreamHandler()
+        console_handler.setLevel("DEBUG")
+        console_handler.setFormatter(ColorFormatter('%(levelname)s: %(message)s'))
+        self.logger.addHandler(console_handler)
+    
+    def info(self, message: str) -> None:
+        """Log an info message."""
+        self.logger.info(message)
+    
+    def warn(self, message: str) -> None:
+        """Log a warning message."""
+        self.logger.warning(message)

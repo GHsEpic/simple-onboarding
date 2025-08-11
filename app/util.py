@@ -1,4 +1,5 @@
-import json
+import json, io
+from PyPDF2 import PdfReader
 
 def format_duns(duns) -> tuple[bool, str]:
     """Format DUNS number to XX-XXX-XXXX format if possible."""
@@ -35,3 +36,22 @@ def load_key(file_path: str) -> str:
         return (False, f"File not found: {file_path}")
     except Exception as e:
         return (False, f"Error reading file: {file_path}, Error: {str(e)}")
+    
+def extract_text_from_pdf(file_stream: io.BytesIO, google_client) -> str:
+    """Extract text from a PDF file stream."""
+    try:
+        reader = PdfReader(file_stream)
+        text = ''
+        for page in reader.pages:
+            text += page.extract_text() or ''
+        text = text.strip()  # Remove leading and trailing whitespace
+    except Exception as e:
+        return ""
+    
+    if text or not google_client:
+        return text
+    
+    file_stream.seek(0)  # Reset stream position
+    response = google_client(file_stream)
+
+    return response.data["text"] if response.status_code == 200 else ""

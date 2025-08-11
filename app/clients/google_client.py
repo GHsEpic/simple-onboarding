@@ -5,12 +5,13 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build, MediaFileUpload
 from googleapiclient.http import MediaIoBaseUpload
 from app.clients.BaseClient import BaseClient
-from app.config import CLIENTS, CREDENTIALS
+from app.config import CREDENTIALS
+from app.response import APIResponse
 
 
 class GoogleClient(BaseClient):
     """GoogleClient class to handle Google Drive and Docs operations."""
-    def __init__(self, token, credentials) -> None:
+    def __init__(self, token=None, credentials=None) -> None:
         self.token = token
         self.credentials = credentials                                                                                   
         self.SCOPES = [                                                                            #Google API scopes for Drive and Docs
@@ -28,15 +29,15 @@ class GoogleClient(BaseClient):
             if self.credentials and self.credentials.expired and self.credentials.refresh_token:
                 self.credentials.refresh(Request())                                                      #Refresh the credentials if expired 
             else:
-                flow = InstalledAppFlow.from_client_config(self.credentials, self.SCOPES)                                                        #Create a flow instance from the client configuration
-                self.credentials = flow.run_local_server(port=0)                                         #Run the local server for authentication
+                flow = InstalledAppFlow.from_client_secrets_file("credentials/google_secret.json", scopes=self.SCOPES)                                                      #Create a flow instance from the client configuration
+                self.credentials = flow.run_local_server(port=0, access_type="offline", prompt="consent")                                         #Run the local server for authentication
 
             with open("credentials/google_token.json", 'w') as token:
                 token.write(self.credentials.to_json())                                                  #Save the credentials to token.json
 
     def upload_pdf(self, file_path: str) -> str:
         """Upload a PDF file to Google Drive, convert it to a Google Doc and return the document ID."""
-        drive_service = build('drive', 'v3', credentials=self.creds)                               #Build the Drive service
+        drive_service = build('drive', 'v3', credentials=self.credentials)                               #Build the Drive service
 
         file_metadata = {                                                                          #Metadata for the file to be uploaded
             'name': os.path.basename(file_path),
@@ -54,7 +55,7 @@ class GoogleClient(BaseClient):
     
     def upload_pdf_stream(self, file_stream: io.BytesIO) -> str:
         """Upload a PDF file stream to Google Drive, convert it to a Google Doc and return the document ID."""
-        drive_service = build('drive', 'v3', credentials=self.creds)                               #Build the Drive service
+        drive_service = build('drive', 'v3', credentials=self.credentials)                               #Build the Drive service
 
         file_metadata = {                                                                          #Metadata for the file to be uploaded
             'name': 'Uploaded PDF',
@@ -71,12 +72,12 @@ class GoogleClient(BaseClient):
         return file.get('id')                                                                      #Return the file ID of the uploaded document
     
     def delete_file(self, doc_id: str) -> None:
-        drive_service = build('drive', 'v3', credentials=self.creds)                               #Build the Drive service
+        drive_service = build('drive', 'v3', credentials=self.credentials)                               #Build the Drive service
         drive_service.files().delete(fileId=doc_id).execute()                                      #Delete the document by ID
 
     def extract_text_from_doc(self, doc_id: str) -> str:
         """Extract text from a Google Doc by its document ID."""
-        docs_service = build('docs', 'v1', credentials=self.creds)                                 #Build the Docs service
+        docs_service = build('docs', 'v1', credentials=self.credentials)                                 #Build the Docs service
         doc = docs_service.documents().get(documentId=doc_id).execute()                            #Get the document by ID
 
         text = ''
@@ -102,7 +103,9 @@ class GoogleClient(BaseClient):
         doc_id = self.upload_pdf_stream(file_stream)
         text = self.extract_text_from_doc(doc_id)
         self.delete_file(doc_id)
-        return text
+        #Format text since OCR may return text looking like "Stutt g a rt" or "Stutt o art" instead of "Stuttgart"
+        #Somehow extract relevant information from the text
+        return APIResponse(status_code=200, message="Extracted text from ", data={"text": text})
 
 
 
