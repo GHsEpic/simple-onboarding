@@ -90,7 +90,6 @@ python app/main.py
 |------------|--------------------------|----------------------------------------|-------------------------------|----------------------------|
 | ```GET```  | ```/dataByDUNS/{DUNS}``` | Get company data from the D&B API      | Path param: DUNS number       | JSON with company details  |
 | ```POST``` | ```/dataFromPDF/```      | Extract company data from supplied PDF | Multipart form-data with file | JSON with extracted fields |
-|            |                          |                                        |                               |                            |
 
 **NOTE**: The ```/dataByDUNS/``` endpoint's logic is not yet implemented.
 
