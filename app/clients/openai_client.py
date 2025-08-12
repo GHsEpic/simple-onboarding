@@ -31,7 +31,7 @@ class OpenAIClient(BaseClient):
         except RateLimitError as e:
             return False, APIResponse(status_code=429, message="Rate limit exceeded")
         except Exception as e:
-            return False, APIResponse(status_code=500, message=str(e))
+            return False, APIResponse(status_code=400, message=str(e))
         
     
     def __call__(self, filestream: io.BytesIO, google_client) -> dict:

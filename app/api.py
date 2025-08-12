@@ -33,18 +33,20 @@ class API:
                 return APIResponse(status_code=503, message="Route unavailable", data={}).to_dict()
             success, formatted_duns = format_duns(DUNS)
             if not success:
-                return APIResponse(status_code=400, message="Invalid DUNS format", data={}).to_dict()
+                return APIResponse(status_code=415, message="Invalid DUNS format", data={}).to_dict()
             valid = validate_duns_format(formatted_duns)
             if not valid:
-                return APIResponse(status_code=400, message="Invalid DUNS format", data={}).to_dict()
+                return APIResponse(status_code=415, message="Invalid DUNS format", data={}).to_dict()
             
             response = self.dnb_client(formatted_duns)
             return response.to_dict()
                                                                           
         @self.app.post("/dataFromPDF/")
         async def get_data_from_pdf(file: UploadFile = File(...)) -> dict:
+            if not CLIENTS.openai.available:
+                return APIResponse(status_code=503, message="Route is unavailable", data={}).to_dict()
             if not file.filename.endswith('.pdf'):
-                return APIResponse(status_code=400, message="File must be a PDF", data={}).to_dict()
+                return APIResponse(status_code=415, message="File must be a PDF", data={}).to_dict()
             contents = await file.read()
             file_stream = io.BytesIO(contents)
             response = self.openai_client(file_stream, self.google_client)

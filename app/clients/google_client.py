@@ -5,7 +5,6 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build, MediaFileUpload
 from googleapiclient.http import MediaIoBaseUpload
 from app.clients.BaseClient import BaseClient
-from app.config import CREDENTIALS
 from app.response import APIResponse
 
 
@@ -93,16 +92,22 @@ class GoogleClient(BaseClient):
     def extract_text_from_pdf(self, file_path: str | os.PathLike) -> str: # All-in-one method to extract text from a PDF file
         """Extract text from a PDF file by uploading it to Google Drive,
           converting it to a Google Doc, and extracting the text."""
-        doc_id = self.upload_pdf(file_path)
-        text = self.extract_text_from_doc(doc_id)
-        self.delete_file(doc_id)
-        return text
+        try:
+            doc_id = self.upload_pdf(file_path)
+            text = self.extract_text_from_doc(doc_id)
+            self.delete_file(doc_id)
+        except:
+            return APIResponse(status_code=400, message="Something went wrong", data={})
+        return APIResponse(status_code=200, message="Extracted text from PDF", data={"text":text})
     
     def __call__(self, file_stream: io.BytesIO) -> str:
         """Extract text from a PDF file stream."""
-        doc_id = self.upload_pdf_stream(file_stream)
-        text = self.extract_text_from_doc(doc_id)
-        self.delete_file(doc_id)
+        try:
+            doc_id = self.upload_pdf_stream(file_stream)
+            text = self.extract_text_from_doc(doc_id)
+            self.delete_file(doc_id)
+        except:
+            return APIResponse(status_code=400, message="Something went wrong", data={})
         #Format text since OCR may return text looking like "Stutt g a rt" or "Stutt o art" instead of "Stuttgart"
         #Somehow extract relevant information from the text
-        return APIResponse(status_code=200, message="Extracted text from ", data={"text": text})
+        return APIResponse(status_code=200, message="Extracted text from PDF", data={"text": text})

@@ -56,6 +56,8 @@ class CLIENTS:
     ...
 ```
 
+**NOTE**: Availability will be automatically set to ```False``` if no key is found.
+
 # API-Keys & Tokens
 
 All credentials are stored in the ```app/credentials```directory.
@@ -92,6 +94,20 @@ python app/main.py
 | ```POST``` | ```/dataFromPDF/```      | Extract company data from supplied PDF | Multipart form-data with file | JSON with extracted fields |
 
 **NOTE**: The ```/dataByDUNS/``` endpoint's logic is not yet implemented.
+
+---
+
+## Response codes
+
+| 200 | OK                                  |
+|-----|-------------------------------------|
+| 400 | Not OK                              |
+|-----|-------------------------------------|
+| 415 | Invalid DUNS/File isn't a PDF       |
+|-----|-------------------------------------|
+| 429 | Rate limit exceeded (OpenAI client) |
+|-----|-------------------------------------|
+| 503 | Route unavailable                   |
 
 ---
 
