@@ -27,31 +27,29 @@ def load_key(file_path: str) -> str:
         with open(file_path, 'r') as file:
             data = file.read().strip()
         if file_path.endswith('.json'):
-            return (True, json.loads(data))  # Return JSON data as a dictionary
+            return (True, json.loads(data) or {})  # Return JSON data as a dictionary
         else:
             return (True, data)
     except FileNotFoundError:
         with open(file_path, 'w') as file:
-            file.write("#Replace with your key")
+            file.write("#Replace with your key")   # Create file with placeholder
         return (False, f"File not found: {file_path}")
-    except Exception as e:
-        return (False, f"Error reading file: {file_path}, Error: {str(e)}")
     
 def extract_text_from_pdf(file_stream: io.BytesIO, google_client) -> str:
     """Extract text from a PDF file stream."""
     try:
-        reader = PdfReader(file_stream)
+        reader = PdfReader(file_stream)     # Try reading text from the PDF (only works with typed PDFs)
         text = ''
         for page in reader.pages:
             text += page.extract_text() or ''
-        text = text.strip()  # Remove leading and trailing whitespace
+        text = text.strip()
     except Exception as e:
         return ""
     
-    if text or not google_client:
+    if text or not google_client:           # Successfully extracted text or no fallback
         return text
     
-    file_stream.seek(0)  # Reset stream position
-    response = google_client(file_stream)
+    file_stream.seek(0)                     # Reset stream position
+    response = google_client(file_stream)   # Use the google client for OCR
 
     return response.data["text"] if response.status_code == 200 else ""

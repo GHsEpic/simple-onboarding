@@ -1,4 +1,3 @@
-from fastapi import Request
 from logging import getLogger, Formatter, StreamHandler
 
 # ANSI escape codes for colors
@@ -11,7 +10,7 @@ COLORS = {
 }
 RESET = '\033[0m'
 
-class ColorFormatter(Formatter):
+class ColorFormatter(Formatter):    # Class for formatting for using colors in logging
     def format(self, record):
         log_color = COLORS.get(record.levelname, RESET)
         message = super().format(record)

@@ -1,0 +1,37 @@
+{
+"type": "json_schema",  
+"json_schema": {  
+    "name": "test",
+    "schema": {
+        "type": "object",
+        "additionalProperties": false,  
+        "properties": {
+            "success": {"type": "boolean"},
+            "data": {
+                "type": "object",
+                "additionalProperties": false,  
+                "properties": {
+                    "company_name": {"type": "string"},
+                    "founding_date": {"type": "string"},
+                    "shareholders": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,  
+                            "properties": {
+                                "name": {"type": "string"},
+                                "shares": {"type": "string"},
+                                "date_of_birth": {"type": "string"},
+                                "phone": {"type": "string"}
+                            },
+                            "required": ["name", "shares", "date_of_birth", "phone"]
+                        }
+                    }
+                },
+                "required": ["company_name", "founding_date", "shareholders"]
+            }
+        },
+        "required": ["success", "data"]
+    }
+}
+}

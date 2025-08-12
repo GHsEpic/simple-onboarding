@@ -7,7 +7,7 @@ configLogger = getLogger("config")
 DEBUG = True
 configLogger.debug("Loading configuration...")
 
-class CLIENTS:
+class CLIENTS:  # Set client accesibility and message
     class dnb:
         available = False
         message = "Not yet implemented"
@@ -20,7 +20,7 @@ class CLIENTS:
 
 
 
-class CREDENTIALS:
+class CREDENTIALS: # Load credentials and set availability if unavailable
     dnb_token, google_credentials, google_token, openai_token = None, None, None, None
     
     if CLIENTS.dnb.available:
@@ -54,44 +54,3 @@ class CREDENTIALS:
         else:
             CLIENTS.openai.available = False
             CLIENTS.openai.message = _
-
-
-OPENAI_JSON_SCHEMA = {
-                "type": "json_schema",  # Changed back to json_schema
-                "json_schema": {  # Added json_schema key
-                    "name": "test",
-                    "schema": {
-                        "type": "object",
-                        "additionalProperties": False,  # Added this line
-                        "properties": {
-                            "success": {
-                                "type": "boolean"
-                            },
-                            "data": {
-                                "type": "object",
-                                "additionalProperties": False,  # Added this line
-                                "properties": {
-                                    "company_name": {"type": "string"},
-                                    "founding_date": {"type": "string"},
-                                    "shareholders": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "additionalProperties": False,  # Added this line
-                                            "properties": {
-                                                "name": {"type": "string"},
-                                                "shares": {"type": "string"},
-                                                "date_of_birth": {"type": "string"},
-                                                "phone": {"type": "string"}
-                                            },
-                                            "required": ["name", "shares", "date_of_birth", "phone"]
-                                    }
-                                }
-                            },
-                            "required": ["company_name", "founding_date", "shareholders"]
-                        }
-                    },
-                    "required": ["success", "data"]
-                    }
-                }
-            }
