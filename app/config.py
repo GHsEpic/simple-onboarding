@@ -1,11 +1,13 @@
-from util import load_key
-from logging import getLogger
+import json, dotenv, os
+from autoLogging import AutoLogger
 
-configLogger = getLogger("config")
+dotenv.load_dotenv()
 
+configLogger = AutoLogger("config")
 
-DEBUG = True
-configLogger.debug("Loading configuration...")
+DEBUG = bool(os.getenv("DEBUG"))
+
+configLogger.info("Loading configuration")
 
 class CLIENTS:  # Set client accesibility and message
     class dnb:
@@ -16,41 +18,38 @@ class CLIENTS:  # Set client accesibility and message
         message = "Accessible"
     class openai:
         available = True
-        message = "No tokens"
+        message = "Accessible"
+    class openregister:
+        available = True
+        message = "Accessible"
 
+configLogger.info(f"D&B available: {CLIENTS.dnb.available} | Message: {CLIENTS.dnb.message}")
+configLogger.info(f"Google available: {CLIENTS.google.available} | Message: {CLIENTS.google.message}")
+configLogger.info(f"OpenAI available: {CLIENTS.openai.available} | Message: {CLIENTS.openai.message}")
+configLogger.info(f"OpenRegister available: {CLIENTS.openregister.available} | Message: {CLIENTS.openregister.message}")
 
-
-class CREDENTIALS: # Load credentials and set availability if unavailable
-    dnb_token, google_credentials, google_token, openai_token = None, None, None, None
+class CREDENTIALS: # Load credentials if available
+    dnb_token, google_credentials, google_token, openai_token, openregister = None, None, None, None, None
     
     if CLIENTS.dnb.available:
-        success, _ = load_key("credentials/dnb_token.txt")
-    
-        if success:
-            dnb_token = _
-        else:
-            CLIENTS.dnb.available = False
-            CLIENTS.dnb.message = _
+        dnb_token = os.getenv("DNB_TOKEN")
 
     if CLIENTS.google.available:
-        success, _ = load_key("credentials/google_credentials.json")
-        if success:
-            google_credentials = _
-        else:
-            CLIENTS.google.available = False
-            CLIENTS.google.message = _
-    
-        success, _ = load_key("credentials/google_token.json")
-        if success:
-            google_token = _
-        else:
-            #CLIENTS.google.available = False
-            CLIENTS.google.message = _
+        google_credentials = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
+        google_token = json.loads(os.getenv("GOOGLE_TOKEN"))
     
     if CLIENTS.openai.available:
-        success, _ = load_key("credentials/openai_token.txt")
-        if success:
-            openai_token = _
-        else:
-            CLIENTS.openai.available = False
-            CLIENTS.openai.message = _
+        openai_token = os.getenv("OPENAI_TOKEN")
+    
+    if CLIENTS.openregister.available:
+        openregister = os.getenv("OPENREGISTER_TOKEN")
+
+try:    # Load the response format for ChatGPT
+    with open("openai_response_format.json") as f:
+        OPENAI_RESPONSE_FORMAT = json.loads(f.read())
+    configLogger.info("Succesfully loaded ChatGPT response format")
+except:
+    with open("openai_response_format.json", "w") as f:
+        f.write("{}")
+    configLogger.warn("Couldn't load ChatGPT response format, created placeholder")
+    OPENAI_RESPONSE_FORMAT = {}

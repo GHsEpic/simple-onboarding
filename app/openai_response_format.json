@@ -1,37 +1,225 @@
 {
-"type": "json_schema",  
-"json_schema": {  
-    "name": "test",
-    "schema": {
-        "type": "object",
-        "additionalProperties": false,  
-        "properties": {
-            "success": {"type": "boolean"},
-            "data": {
-                "type": "object",
-                "additionalProperties": false,  
-                "properties": {
-                    "company_name": {"type": "string"},
-                    "founding_date": {"type": "string"},
-                    "shareholders": {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "full-schema",
+        "schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "company": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "address": {
+                                    "type": "string"
+                                },
+                                "city": {
+                                    "type": "string"
+                                },
+                                "postal_code": {
+                                    "type": "string"
+                                },
+                                "street": {
+                                    "type": "string"
+                                },
+                                "legal_form": {
+                                    "type": "string"
+                                },
+                                "purpose": {
+                                    "type": "string"
+                                },
+                                "german_company_registration_number": {
+                                    "type": "string"
+                                },
+                                "register_court": {
+                                    "type": "string"
+                                },
+                                "register_number": {
+                                    "type": "string"
+                                },
+                                "country": {
+                                    "type": "string"
+                                },
+                                "register_type": {
+                                    "type": "string"
+                                },
+                                "support_phone": {
+                                    "type": "string"
+                                },
+                                "support_email": {
+                                    "type": "string"
+                                },
+                                "status": {
+                                    "type": "boolean"
+                                },
+                                "industry_codes": {
+                                    "type": "array",
+                                    "additionalProperties": false,
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "address",
+                                "city",
+                                "postal_code",
+                                "street",
+                                "legal_form",
+                                "purpose",
+                                "german_company_registration_number",
+                                "register_court",
+                                "register_number",
+                                "country",
+                                "register_type",
+                                "support_phone",
+                                "support_email",
+                                "status",
+                                "industry_codes"
+                            ]
+                        }
+                    },
+                    "representatives": {
                         "type": "array",
+                        "additionalProperties": false,
                         "items": {
                             "type": "object",
-                            "additionalProperties": false,  
+                            "additionalProperties": false,
                             "properties": {
-                                "name": {"type": "string"},
-                                "shares": {"type": "string"},
-                                "date_of_birth": {"type": "string"},
-                                "phone": {"type": "string"}
+                                "city": {
+                                    "type": "string"
+                                },
+                                "country": {
+                                    "type": "string"
+                                },
+                                "street": {
+                                    "type": "string"
+                                },
+                                "address": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "role": {
+                                    "type": "string"
+                                },
+                                "date_of_birth": {
+                                    "type": "string"
+                                },
+                                "phone": {
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "type": "string"
+                                }
                             },
-                            "required": ["name", "shares", "date_of_birth", "phone"]
+                            "required": [
+                                "city",
+                                "country",
+                                "street",
+                                "address",
+                                "name",
+                                "role",
+                                "date_of_birth",
+                                "phone",
+                                "email"
+                            ]
                         }
+                    },
+                    "owners": {
+                        "type": "array",
+                        "additionalProperties": false,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "city": {
+                                    "type": "string"
+                                },
+                                "country": {
+                                    "type": "string"
+                                },
+                                "street": {
+                                    "type": "string"
+                                },
+                                "address": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "role": {
+                                    "type": "string"
+                                },
+                                "date_of_birth": {
+                                    "type": "string"
+                                },
+                                "phone": {
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "type": "string"
+                                },
+                                "shares_percentage": {
+                                    "type": "number"
+                                },
+                                "shares_nominal": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "city",
+                                "country",
+                                "street",
+                                "address",
+                                "name",
+                                "role",
+                                "date_of_birth",
+                                "phone",
+                                "email",
+                                "shares_percentage",
+                                "shares_nominal"
+                            ]
+                        }
+                    },
+                    "capital": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "total_amount": {
+                                "type": "number"
+                            },
+                            "total_shares": {
+                                "type": "integer"
+                            },
+                            "currency": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "total_amount",
+                            "total_shares",
+                            "currency"
+                        ]
                     }
-                },
-                "required": ["company_name", "founding_date", "shareholders"]
-            }
-        },
-        "required": ["success", "data"]
+                }
+            },
+            "required": [
+                "success",
+                "data"
+            ]       
+        }
     }
-}
 }

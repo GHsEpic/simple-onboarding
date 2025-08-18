@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 class BaseClient(ABC):
+    """Abstract base class for clients"""
     def __init__(self):
         pass
 

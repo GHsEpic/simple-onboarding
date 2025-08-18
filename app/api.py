@@ -1,12 +1,14 @@
-from fastapi import FastAPI, HTTPException, Request, UploadFile, File
+import io
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from util import format_duns, validate_duns_format
 from clients.dnb_client import DNBClient
 from clients.google_client import GoogleClient
 from clients.openai_client import OpenAIClient
-import io
+from clients.openregister_client import OpenregisterClient
 from config import *
 from autoLogging import AutoLogger
-from response import APIResponse
+from app.responses import APIResponse
 
 class API:
     """API class to handle FastAPI application and routes."""
@@ -14,19 +16,22 @@ class API:
         self.app = FastAPI()
         self.setup_logging()
         self.setup_routes()
-        self.dnb_client, self.google_client, self.openai_client = None, None, None
+        self.enable_cors()
+        self.dnb_client, self.google_client, self.openai_client, self.openregister_client = None, None, None, None
         if CLIENTS.dnb.available: self.dnb_client = DNBClient(token=CREDENTIALS.dnb_token)
         if CLIENTS.google.available: self.google_client = GoogleClient(token=CREDENTIALS.google_token)
         if CLIENTS.openai.available: self.openai_client = OpenAIClient(token=CREDENTIALS.openai_token)  
+        if CLIENTS.openregister.available: self.openregister_client = OpenregisterClient(token=CREDENTIALS.openregister)
 
     def run(self) -> None:
         """Run the FastAPI application."""
-        print(CLIENTS.google.available, CLIENTS.google.message)
         import uvicorn
+        self.logger.info("Running API")
         uvicorn.run(self.app, host="127.0.0.1", port=8000)
     
     def setup_routes(self) -> None:
         """Set up API routes."""
+        self.logger.info("Setting up routes")
         @self.app.get("/dataByDUNS/{DUNS}")
         async def get_data_from_duns(DUNS) -> dict:
             if not CLIENTS.dnb.available:
@@ -45,13 +50,24 @@ class API:
         async def get_data_from_pdf(file: UploadFile = File(...)) -> dict:
             if not CLIENTS.openai.available:
                 return APIResponse(status_code=503, message="Route is unavailable", data={}).to_dict()
-            if not file.filename.endswith('.pdf'):
+            if not file.filename.lower().endswith('.pdf'):
                 return APIResponse(status_code=415, message="File must be a PDF", data={}).to_dict()
             contents = await file.read()
             file_stream = io.BytesIO(contents)
             response = self.openai_client(file_stream, self.google_client)
+            self.openregister_client.enrich_data(response.data)
             return response.to_dict()
     
     def setup_logging(self) -> None:
         """Set up automatic logging middleware."""
-        self.logger = AutoLogger(self.app, __name__)
+        self.logger = AutoLogger("API")
+    
+    def enable_cors(self):
+        self.logger.info("Enabling CORS")
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],  # or ["http://localhost:3000"] for specific origin
+            allow_credentials=True,
+            allow_methods=["*"],  # ["GET", "POST"] if you want to restrict
+            allow_headers=["*"],
+        )

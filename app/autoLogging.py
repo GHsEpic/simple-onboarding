@@ -1,4 +1,7 @@
 from logging import getLogger, Formatter, StreamHandler
+from os import getenv
+
+DEBUG = bool(getenv("DEBUG")) #Do NOT import DEBUG from config (circular import)
 
 # ANSI escape codes for colors
 COLORS = {
@@ -18,8 +21,7 @@ class ColorFormatter(Formatter):    # Class for formatting for using colors in l
     
 class AutoLogger:
     """Middleware for automatic logging of requests and responses."""
-    def __init__(self, app, name: str) -> None:
-        self.app = app
+    def __init__(self, name: str) -> None:
         self.logger = getLogger(name)
         self.logger.setLevel("DEBUG")
 
@@ -35,3 +37,8 @@ class AutoLogger:
     def warn(self, message: str) -> None:
         """Log a warning message."""
         self.logger.warning(message)
+    
+    def debug(self, message):
+        """Log a debug message"""
+        if DEBUG:
+            self.logger.debug(message)

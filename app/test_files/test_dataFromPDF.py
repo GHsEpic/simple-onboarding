@@ -8,5 +8,5 @@ for file_path in os.listdir("../test_files/pdfs"):  # Get all files in the test 
         file_content = BytesIO(f.read())    # Turn file into a stream
     files = {"file": ("upload.pdf", file_content, "application/pdf")}
     response = requests.post("http://127.0.0.1:8000/dataFromPDF/", files=files) # Post the request
-    print(response.json()) # Print the result
+    print(response.text) # Print the result
     input("Press Enter to continue...")

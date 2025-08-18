@@ -1,4 +1,4 @@
-import json, io
+import io
 from PyPDF2 import PdfReader
 
 def format_duns(duns) -> tuple[bool, str]:
@@ -20,20 +20,6 @@ def validate_duns_format(duns: str) -> bool:    # Validate DUNS number format, p
     if not duns.replace("-", "").isdigit():     # DUNS contains non-digit characters
         return False
     return True
-
-def load_key(file_path: str) -> str:
-    """Load a key from a file."""
-    try:
-        with open(file_path, 'r') as file:
-            data = file.read().strip()
-        if file_path.endswith('.json'):
-            return (True, json.loads(data) or {})  # Return JSON data as a dictionary
-        else:
-            return (True, data)
-    except FileNotFoundError:
-        with open(file_path, 'w') as file:
-            file.write("#Replace with your key")   # Create file with placeholder
-        return (False, f"File not found: {file_path}")
     
 def extract_text_from_pdf(file_stream: io.BytesIO, google_client) -> str:
     """Extract text from a PDF file stream."""
@@ -53,3 +39,12 @@ def extract_text_from_pdf(file_stream: io.BytesIO, google_client) -> str:
     response = google_client(file_stream)   # Use the google client for OCR
 
     return response.data["text"] if response.status_code == 200 else ""
+
+def validate_german_company_id_format(company_id) -> bool:
+    """Validate that the company_id follows the format DE-HR[A/B]-XXXXXX-XXXXX"""
+    as_list = company_id.lower().split("-")
+    if len(as_list) != 4: return False
+    if as_list[0] != "de": return False
+    if not as_list[1].startswith("hr"): return False
+    if not as_list["2"].isdigit() or not as_list["3"].is_digit(): return False
+    return True

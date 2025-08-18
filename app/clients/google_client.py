@@ -1,11 +1,13 @@
 import os, io
-from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build, MediaFileUpload
 from googleapiclient.http import MediaIoBaseUpload
 from app.clients.BaseClient import BaseClient
-from app.response import APIResponse
+from responses import ClientResponse
+from config import CREDENTIALS
+from autoLogging import AutoLogger
 
 
 class GoogleClient(BaseClient):
@@ -17,22 +19,29 @@ class GoogleClient(BaseClient):
             'https://www.googleapis.com/auth/drive',
             'https://www.googleapis.com/auth/documents.readonly'
         ]
+        self.logger = AutoLogger("GoogleClient")
+        self.logger.info("Initializing google client")
         self.authenticate()
 
     def authenticate(self) -> None:
         """Authenticate the Google client using OAuth2 credentials."""
         if self.token:
             self.credentials = Credentials.from_authorized_user_info(self.token, self.SCOPES) # Create credentials from token
+            self.logger.debug("Created google credentials from token")
+        else:
+            self.logger.warn("Found no google token")
 
         if not self.credentials or not self.credentials.valid:
             if self.credentials and self.credentials.expired and self.credentials.refresh_token:
+                self.logger.debug("Refreshing google credentials")
                 self.credentials.refresh(Request()) # Refresh the credentials if expired 
             else:
+                self.logger.warn("Opening browser session for manual authorization")
                 flow = InstalledAppFlow.from_client_secrets_file("credentials/google_secret.json", scopes=self.SCOPES)
                 self.credentials = flow.run_local_server(port=0, access_type="offline", prompt="consent") # Open the browser on an authentication prompt, offline and consent are required for getting a refresh_token
 
-            with open("credentials/google_token.json", 'w') as token:
-                token.write(self.credentials.to_json()) # Save the credentials
+            CREDENTIALS.google_token = self.credentials.to_json()   # Update google token in global credentials
+            self.logger.debug("Succesfully updated google token globally")
 
     def upload_pdf(self, file_path: str) -> str:
         """Upload a PDF file to Google Drive, convert it to a Google Doc and return the document ID."""
@@ -97,8 +106,8 @@ class GoogleClient(BaseClient):
             text = self.extract_text_from_doc(doc_id)
             self.delete_file(doc_id)
         except:
-            return APIResponse(status_code=400, message="Something went wrong", data={})
-        return APIResponse(status_code=200, message="Extracted text from PDF", data={"text":text})
+            return ""
+        return text
     
     def __call__(self, file_stream: io.BytesIO) -> str:
         """Extract text from a PDF file stream."""
@@ -107,7 +116,7 @@ class GoogleClient(BaseClient):
             text = self.extract_text_from_doc(doc_id)
             self.delete_file(doc_id)
         except:
-            return APIResponse(status_code=400, message="Something went wrong", data={})
+            return ClientResponse(status_code=400, message="Something went wrong", data={})
         #Format text since OCR may return text looking like "Stutt g a rt" or "Stutt o art" instead of "Stuttgart"
-        #Somehow extract relevant information from the text
-        return APIResponse(status_code=200, message="Extracted text from PDF", data={"text": text})
+        #Somehow extract relevant information from the text if used standalone
+        return ClientResponse(status_code=200, message="Extracted text from PDF", data={"text": text})

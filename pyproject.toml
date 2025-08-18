@@ -3,9 +3,18 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "your_package_name"
-version = "0.1.0"
+name = "simple-onboarding"
+version = "1.0.0"
 
 dependencies = [
-    ##
+    "fastapi==0.116.1",
+    "google_api_python_client==2.178.0",
+    "google_auth_oauthlib==1.2.2",
+    "openai==1.99.9",
+    "protobuf==6.32.0",
+    "PyPDF2==3.0.1",
+    "python-dotenv==1.1.1",
+    "rapidfuzz==3.13.0",
+    "Requests==2.32.4",
+    "uvicorn==0.35.0"
 ]
