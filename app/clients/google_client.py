@@ -5,9 +5,9 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build, MediaFileUpload
 from googleapiclient.http import MediaIoBaseUpload
 from app.clients.BaseClient import BaseClient
-from responses import ClientResponse
-from config import CREDENTIALS
-from autoLogging import AutoLogger
+from app.responses import ClientResponse
+from app.config import CREDENTIALS
+from app.autoLogging import AutoLogger
 
 
 class GoogleClient(BaseClient):

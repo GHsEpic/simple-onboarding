@@ -1,5 +1,5 @@
 import json, dotenv, os
-from autoLogging import AutoLogger
+from app.autoLogging import AutoLogger
 
 dotenv.load_dotenv()
 
@@ -45,11 +45,11 @@ class CREDENTIALS: # Load credentials if available
         openregister = os.getenv("OPENREGISTER_TOKEN")
 
 try:    # Load the response format for ChatGPT
-    with open("openai_response_format.json") as f:
+    with open("app/openai_response_format.json") as f:
         OPENAI_RESPONSE_FORMAT = json.loads(f.read())
     configLogger.info("Succesfully loaded ChatGPT response format")
 except:
-    with open("openai_response_format.json", "w") as f:
-        f.write("{}")
-    configLogger.warn("Couldn't load ChatGPT response format, created placeholder")
+    #with open("openai_response_format.json", "w") as f:
+    #    f.write("{}")
+    configLogger.warn("Couldn't load ChatGPT response format, did not create placeholder")
     OPENAI_RESPONSE_FORMAT = {}

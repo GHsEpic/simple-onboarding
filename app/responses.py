@@ -1,5 +1,5 @@
-from config import OPENAI_RESPONSE_FORMAT
-from company_data import CompanyData
+from app.config import OPENAI_RESPONSE_FORMAT
+from app.company_data import CompanyData
 
 class ClientResponse:
     """Base class for Client responses."""

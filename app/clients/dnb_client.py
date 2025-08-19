@@ -1,7 +1,7 @@
-from .BaseClient import BaseClient
-from responses import ClientResponse
-from company_data import CompanyData
-from autoLogging import AutoLogger
+from app.clients.BaseClient import BaseClient
+from app.responses import ClientResponse
+from app.company_data import CompanyData
+from app.autoLogging import AutoLogger
 
 class DNBClient(BaseClient):
     """Client for interacting with D&B API."""  #NOTE: We do not have D&B API access yet and by the looks of it never will

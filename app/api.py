@@ -1,14 +1,15 @@
 import io
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from util import format_duns, validate_duns_format
-from clients.dnb_client import DNBClient
-from clients.google_client import GoogleClient
-from clients.openai_client import OpenAIClient
-from clients.openregister_client import OpenregisterClient
-from config import *
-from autoLogging import AutoLogger
+from app.util import format_duns, validate_duns_format
+from app.clients.dnb_client import DNBClient
+from app.clients.google_client import GoogleClient
+from app.clients.openai_client import OpenAIClient
+from app.clients.openregister_client import OpenregisterClient
+from app.config import *
+from app.autoLogging import AutoLogger
 from app.responses import APIResponse
+from app.company_data import CompanyData
 
 class API:
     """API class to handle FastAPI application and routes."""
@@ -22,6 +23,10 @@ class API:
         if CLIENTS.google.available: self.google_client = GoogleClient(token=CREDENTIALS.google_token)
         if CLIENTS.openai.available: self.openai_client = OpenAIClient(token=CREDENTIALS.openai_token)  
         if CLIENTS.openregister.available: self.openregister_client = OpenregisterClient(token=CREDENTIALS.openregister)
+
+    def __call__(self, *args, **kwargs):
+        self.logger.warn(*args, **kwargs)
+        return
 
     def run(self) -> None:
         """Run the FastAPI application."""
@@ -55,8 +60,18 @@ class API:
             contents = await file.read()
             file_stream = io.BytesIO(contents)
             response = self.openai_client(file_stream, self.google_client)
-            self.openregister_client.enrich_data(response.data)
+            if CLIENTS.openregister.available:
+                self.openregister_client.enrich_data(response.data)
             return response.to_dict()
+        
+        @self.app.get("/dataByCompanyName/{company_name}")
+        async def get_german_company_data(company_name):
+            if not CLIENTS.openregister.available:
+                return APIResponse(status_code=503, message="Route is unavailable", data={}).to_dict()
+            data = CompanyData()
+            data.company.name = company_name
+            data = self.openregister_client.enrich_data(data)
+            return APIResponse(200, "Got the data", data).to_dict()
     
     def setup_logging(self) -> None:
         """Set up automatic logging middleware."""

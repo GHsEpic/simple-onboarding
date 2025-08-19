@@ -88,138 +88,141 @@
                                 "status",
                                 "industry_codes"
                             ]
-                        }
-                    },
-                    "representatives": {
-                        "type": "array",
-                        "additionalProperties": false,
-                        "items": {
-                            "type": "object",
+                        },
+                        "representatives": {
+                            "type": "array",
                             "additionalProperties": false,
-                            "properties": {
-                                "city": {
-                                    "type": "string"
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "city": {
+                                        "type": "string"
+                                    },
+                                    "country": {
+                                        "type": "string"
+                                    },
+                                    "street": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "role": {
+                                        "type": "string"
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    }
                                 },
-                                "country": {
-                                    "type": "string"
-                                },
-                                "street": {
-                                    "type": "string"
-                                },
-                                "address": {
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
-                                "role": {
-                                    "type": "string"
-                                },
-                                "date_of_birth": {
-                                    "type": "string"
-                                },
-                                "phone": {
-                                    "type": "string"
-                                },
-                                "email": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "city",
-                                "country",
-                                "street",
-                                "address",
-                                "name",
-                                "role",
-                                "date_of_birth",
-                                "phone",
-                                "email"
-                            ]
-                        }
-                    },
-                    "owners": {
-                        "type": "array",
-                        "additionalProperties": false,
-                        "items": {
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "city": {
-                                    "type": "string"
-                                },
-                                "country": {
-                                    "type": "string"
-                                },
-                                "street": {
-                                    "type": "string"
-                                },
-                                "address": {
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
-                                "role": {
-                                    "type": "string"
-                                },
-                                "date_of_birth": {
-                                    "type": "string"
-                                },
-                                "phone": {
-                                    "type": "string"
-                                },
-                                "email": {
-                                    "type": "string"
-                                },
-                                "shares_percentage": {
-                                    "type": "number"
-                                },
-                                "shares_nominal": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "city",
-                                "country",
-                                "street",
-                                "address",
-                                "name",
-                                "role",
-                                "date_of_birth",
-                                "phone",
-                                "email",
-                                "shares_percentage",
-                                "shares_nominal"
-                            ]
-                        }
-                    },
-                    "capital": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "total_amount": {
-                                "type": "number"
-                            },
-                            "total_shares": {
-                                "type": "integer"
-                            },
-                            "currency": {
-                                "type": "string"
+                                "required": [
+                                    "city",
+                                    "country",
+                                    "street",
+                                    "address",
+                                    "name",
+                                    "role",
+                                    "date_of_birth",
+                                    "phone",
+                                    "email"
+                                ]
                             }
                         },
-                        "required": [
-                            "total_amount",
-                            "total_shares",
-                            "currency"
-                        ]
-                    }
+                        "owners": {
+                            "type": "array",
+                            "additionalProperties": false,
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "city": {
+                                        "type": "string"
+                                    },
+                                    "country": {
+                                        "type": "string"
+                                    },
+                                    "street": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "role": {
+                                        "type": "string"
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "shares_percentage": {
+                                        "type": "number"
+                                    },
+                                    "shares_nominal": {
+                                        "type": "number"
+                                    }
+                                },
+                                "required": [
+                                    "city",
+                                    "country",
+                                    "street",
+                                    "address",
+                                    "name",
+                                    "role",
+                                    "date_of_birth",
+                                    "phone",
+                                    "email",
+                                    "shares_percentage",
+                                    "shares_nominal"
+                                ]
+                            }
+                        },
+                        "capital": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "total_amount": {
+                                    "type": "number"
+                                },
+                                "total_shares": {
+                                    "type": "integer"
+                                },
+                                "currency": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "total_amount",
+                                "total_shares",
+                                "currency"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "company", "representatives", "owners", "capital"
+                    ]
                 }
             },
             "required": [
                 "success",
                 "data"
-            ]       
+            ]
         }
     }
 }

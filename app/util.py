@@ -1,6 +1,7 @@
 import io
 from PyPDF2 import PdfReader
 
+
 def format_duns(duns) -> tuple[bool, str]:
     """Format DUNS number to XX-XXX-XXXX format if possible."""
     if isinstance(duns, int):                   # Duns was entered as an integer without hyphens
@@ -48,3 +49,14 @@ def validate_german_company_id_format(company_id) -> bool:
     if not as_list[1].startswith("hr"): return False
     if not as_list["2"].isdigit() or not as_list["3"].is_digit(): return False
     return True
+
+def calculate_completion_percentage(obj) -> float:
+    """Calculate the completion percentage of an object"""
+    total, filled = 0, 0
+    for key, value in obj.__dict__.items():
+        if isinstance(key, str):
+            total += 1
+            if bool(value):
+                filled += 1
+    
+    return round(filled/total, 2)

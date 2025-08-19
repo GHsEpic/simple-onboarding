@@ -1,4 +1,6 @@
-from api import API
+from app.api import API
 
 api = API() # Initialize the API instance
-api.run()   # Run the API
+
+if __name__ == "__main__":
+    api.run()   # Run the API

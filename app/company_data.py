@@ -1,3 +1,5 @@
+from app.util import calculate_completion_percentage
+
 class CompanyData:
     """Class for holding any company data"""
     class Company():
@@ -18,9 +20,6 @@ class CompanyData:
             self.support_phone = ""
             self.support_email = ""
             self.status = None
-        
-        def completion_percentage(self):
-            return sum([bool(_) for _ in self.__dict__.values()]) / len(self.__dict__.values())
 
     class Representatives:
         class Representative:
@@ -34,15 +33,9 @@ class CompanyData:
                 self.date_of_birth = ""
                 self.phone = ""
                 self.email = ""
-            
-            def completion_percentage(self):
-                return sum([bool(_) for _ in self.__dict__.values()]) / len(self.__dict__.values())
         
         def __init__(self):
             self.people = []
-        
-        def completion_percentage(self):
-            return sum([representative.completion_percentage() for representative in self.people]) / len(self.people)
 
     class Owners:
         class Owner:
@@ -59,23 +52,14 @@ class CompanyData:
                 self.shares_percentage = 0
                 self.shares_nominal = 0
 
-            def completion_percentage(self):
-                return sum([bool(_) for _ in self.__dict__.values()]) / len(self.__dict__.values())
-
         def __init__(self):
             self.people = []
-
-        def completion_percentage(self):
-            return sum([owner.completion_precentage() for owner in self.people]) / len(self.people)
 
     class Capital:
         def __init__(self):
             self.total_amount = 0
             self.total_shares = 0
             self.currency = ""
-        
-        def completion_percentage(self):
-            return sum([bool(_) for _ in self.__dict__.values()]) / len(self.__dict__.values())
     
     def __init__(self):
         self.company = self.Company()
@@ -143,6 +127,7 @@ class CompanyData:
     
     def from_openregister_details(data):
         """Map the response data from openregister/details to a CompanyData object"""
+        print(data)
         self = CompanyData()
         self.company.name =             data["name"]["name"]
         self.company.address =          data["address"]["formatted_value"]
@@ -150,7 +135,7 @@ class CompanyData:
         self.company.postal_code =      data["address"]["postal_code"]
         self.company.street =           data["address"]["street"]
         self.company.legal_form =       data["legal_form"]
-        self.company.purpose =          data["purpose"]["purpose"]
+        self.company.purpose =          data.get("purpose")["purpose"] if data.get("purpose") else ""
         self.company.id =               data["id"]
         self.company.register_court =   data["register"]["register_court"]
         self.company.register_number =  data["register"]["register_number"]
@@ -160,17 +145,23 @@ class CompanyData:
 
         for person in data["representation"]:
             representative = self.Representatives.Representative()
-            
-            representative.city =           person["city"]
-            representative.country =        person["country"]
-            representative.name =           person["name"]
-            representative.role =           person["role"]
-            representative.date_of_birth =  person["date_of_birth"]
+
+            representative.role = person.get("role")
+            representative.name = person.get("name")
+            if person["type"] == "natural_person":
+                representative.date_of_birth =       person["natural_person"].get("date_of_birth")
+                representative.city =                person["natural_person"].get("city")
+                representative.country =             person["natural_person"].get("country")
+            else:
+                representative.city =    person["legal_person"].get("city")
+                representative.country = person["legal_person"].get("country")
+                representative.date_of_birth = person["legal_person"].get("date_of_birth")
 
             self.representatives.people.append(representative)
         
-        self.capital.total_amount = data["capital"]["amount"]
-        self.capital.currency =     data["capital"]["currency"]
+        if data.get("capital"):
+            self.capital.total_amount = data["capital"].get("amount")
+            self.capital.currency =     data["capital"].get("currency")
 
         return self
 
@@ -181,30 +172,40 @@ class CompanyData:
         for person in data:
             owner = self.owners.Owner()
 
-            owner.role =                person["relation_type"]
-            owner.shares_nominal =      person["nominal_share"]
-            owner.shares_percentage =   person["percentage_share"]
-            owner.role =                person["relation_type"]
-            if person["type"] == "natural_person":
-                owner.city =                person["natural_person"]["city"]
-                owner.country =             person["natural_person"]["country"]
-                owner.date_of_birth =       person["natural_person"]["date_of_birth"]
-                owner.name =                person["natural_person"]["full_name"]
-            else:
-                owner.city =    person["legal_person"]["city"]
-                owner.country = person["legal_person"]["country"]
-                owner.name =    person["legal_person"]["name"]
+            owner.role =                person.get("relation_type")
+            owner.shares_nominal =      person.get("nominal_share")
+            owner.shares_percentage =   person.get("percentage_share")
+            if person.get("type") == "natural_person":
+                owner.city =                person["natural_person"].get("city")
+                owner.country =             person["natural_person"].get("country")
+                owner.date_of_birth =       person["natural_person"].get("date_of_birth")
+                owner.name =                person["natural_person"].get("full_name")
+            elif person.get("type") == "legal_person":
+                owner.city =    person["legal_person"].get("city")
+                owner.country = person["legal_person"].get("country")
+                owner.name =    person["legal_person"].get("name")
             
             self.owners.people.append(owner)
         
         return self
     
-    def completion_percentage(self) -> float:
-        """Get the CompanyData object's average completion"""
-        return round(sum([self.capital.completion_percentage(), self.representatives.completion_percentage(), self.owners.completion_percentage(), self.capital.completion_percentage()]) / 4, 2)
-    
+    def cleanup(self):
+        new_owners = []
+        for owner in self.owners.people:
+            if calculate_completion_percentage(owner) > 0:
+                new_owners.append(owner)
+        
+        new_representatives = []
+        for representative in self.representatives.people:
+            if calculate_completion_percentage(representative) > 0:
+                new_representatives.append(representative)
+        
+        self.owners.people = new_owners
+        self.representatives.people = new_representatives
+
     def to_dict(self) -> dict:
         """Turn the CompanyData object into a JSON-like dict for serialization"""
+        self.cleanup()
         D = {}
         D["company"] = self.company.__dict__
         D["representatives"] = [person.__dict__ for person in self.representatives.people]

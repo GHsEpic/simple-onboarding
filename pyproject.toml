@@ -7,6 +7,7 @@ name = "simple-onboarding"
 version = "1.0.0"
 
 dependencies = [
+    "python-multipart==0.0.20"
     "fastapi==0.116.1",
     "google_api_python_client==2.178.0",
     "google_auth_oauthlib==1.2.2",

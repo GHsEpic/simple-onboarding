@@ -1,11 +1,11 @@
 import io, json
 from openai import OpenAI, RateLimitError
 from app.clients.BaseClient import BaseClient
-from util import extract_text_from_pdf
+from app.util import extract_text_from_pdf
 from app.responses import ClientResponse, APIResponse
-from company_data import CompanyData
-from config import OPENAI_RESPONSE_FORMAT
-from autoLogging import AutoLogger
+from app.company_data import CompanyData
+from app.config import OPENAI_RESPONSE_FORMAT
+from app.autoLogging import AutoLogger
 
 
 class OpenAIClient(BaseClient):
@@ -31,9 +31,11 @@ class OpenAIClient(BaseClient):
                 ],
                 response_format=self.JSON_SCHEMA #<- *
             )
+            self.logger.debug(f"Got ChatGPT response: {response.choices[0].message.content}")
             return True, json.loads(response.choices[0].message.content)    # Return success & response pairs
         except RateLimitError as e:
-            return False, ClientResponse(status_code=429, message="Rate limit exceeded").to_APIResponse()
+            self.logger.warn("Out of OpenAI tokens")
+            return False, ClientResponse(status_code=429, message="Internal rate limit exceeded").to_APIResponse()
         except Exception as e:
             return False, ClientResponse(status_code=400, message=str(e)).to_APIResponse()
         

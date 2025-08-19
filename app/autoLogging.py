@@ -1,7 +1,11 @@
 from logging import getLogger, Formatter, StreamHandler
 from os import getenv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DEBUG = bool(getenv("DEBUG")) #Do NOT import DEBUG from config (circular import)
+print(f"DEBUG is {DEBUG}")
 
 # ANSI escape codes for colors
 COLORS = {
