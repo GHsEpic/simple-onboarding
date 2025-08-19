@@ -287,4 +287,4 @@ The API **always** returns data in this format:
 
 ```
 
-**NOTE** that the default value is "" for string and 0 for numbers, not null.
+**NOTE** that the default value is "" for string and 0 for numbers, not null and owners/representatives may be empty if none are found.
