@@ -99,13 +99,9 @@ to run directly in python.
 ## Response codes
 
 | 200 | OK                                  |
-|-----|-------------------------------------|
 | 400 | Not OK                              |
-|-----|-------------------------------------|
 | 415 | Invalid DUNS/File isn't a PDF       |
-|-----|-------------------------------------|
 | 429 | Rate limit exceeded (Internally)    |
-|-----|-------------------------------------|
 | 503 | Route unavailable                   |
 
 ---
@@ -161,9 +157,9 @@ curl -X GET "http://localhost:8000/dataByCompanyName/Beispielfirma
     "message": "Success",
     "data": {
         "company": {
-            "company_name": "Example Corp.",
-            "address": "123 Business St., New York, NY",
-            "country": "US"
+            "company_name": "Beispielfirma",
+            "address": "Beispielstraße 12, 34567 Beispielstadt",
+            "country": "DE"
         },
         "owners": [
             {
@@ -228,7 +224,7 @@ curl -X POST "http://localhost:8000/dataFromPDF" \
 # Reponse format
 
 The API **always** returns data in this format:
-```json
+```t
 {
     "success": <boolean>,
     "message": <string>,
