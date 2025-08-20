@@ -1,39 +1,50 @@
-import io, json
+"""OpenAI API client baseclass"""
+
+import io
+import json
 from openai import OpenAI, RateLimitError
-from app.clients.BaseClient import BaseClient
+from app.clients.base_client import BaseClient
 from app.util import extract_text_from_pdf
 from app.responses import ClientResponse, APIResponse
 from app.company_data import CompanyData
 from app.config import OPENAI_RESPONSE_FORMAT
-from app.autoLogging import AutoLogger
+from app.auto_logging import AutoLogger
 
 
 class OpenAIClient(BaseClient):
+    """OpenAI API client class"""
     def __init__(self, token: str):
+        super().__init__()
         self.client = OpenAI(api_key=token)
         self.JSON_SCHEMA = OPENAI_RESPONSE_FORMAT
         self.logger = AutoLogger("OpenAIClient")
         self.logger.info("Initializing OpenAI client")
         self.authenticate()
-    
+
     def authenticate(self) -> None:
         """Authenticate the OpenAI client using the provided API key."""
         # No additional authentication needed for OpenAI client
-    
+
     def extract_and_format(self, file_text: str) -> APIResponse:
         """Process the PDF text with OpenAI's GPT model."""
         try:
             response = self.client.chat.completions.create(
-                model="gpt-4.1", # response_format* does not work on gpt-3.5, gpt-3.5-turb0, etc. (even though the docs say so)
-                messages=[ # System message as instructions, user message as text to extract data from
-                    {"role": "system", "content": "You are a data analyst. Extract all wanted information from the text, translate to English if necessary, and respond exclusively in JSON. Fill any unknown field with ''."},
+                # response_format* does not work on gpt-3.5, gpt-3.5-turb0, etc.
+                model="gpt-4.1", 
+                messages=[ 
+                    {"role": "system", "content": """You are a data analyst.
+                                                    Extract all wanted information from the text, 
+                                                    translate to English if necessary, and respond 
+                                                    exclusively in JSON. Fill any unknown field 
+                                                    with ''."""
+                     },
                     {"role": "user", "content": file_text}
                 ],
                 response_format=self.JSON_SCHEMA #<- *
             )
             self.logger.debug(f"Got ChatGPT response: {response.choices[0].message.content}")
             return True, json.loads(response.choices[0].message.content)    # Return success & response pairs
-        except RateLimitError as e:
+        except RateLimitError:
             self.logger.warn("Out of OpenAI tokens")
             return False, ClientResponse(status_code=429, message="Internal rate limit exceeded").to_APIResponse()
         except Exception as e:

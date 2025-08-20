@@ -1,3 +1,5 @@
+"""Custom logger for the API"""
+
 from logging import getLogger, Formatter, StreamHandler
 from os import getenv
 from dotenv import load_dotenv
@@ -18,11 +20,12 @@ COLORS = {
 RESET = '\033[0m'
 
 class ColorFormatter(Formatter):    # Class for formatting for using colors in logging
+    """Formatter for using colors in the terminal and logs"""
     def format(self, record):
         log_color = COLORS.get(record.levelname, RESET)
         message = super().format(record)
         return f"{log_color}{message}{RESET}"
-    
+
 class AutoLogger:
     """Middleware for automatic logging of requests and responses."""
     def __init__(self, name: str) -> None:
@@ -33,15 +36,15 @@ class AutoLogger:
         console_handler.setLevel("DEBUG")
         console_handler.setFormatter(ColorFormatter('%(levelname)s: %(message)s'))
         self.logger.addHandler(console_handler)
-    
+
     def info(self, message: str) -> None:
         """Log an info message."""
         self.logger.info(message)
-    
+
     def warn(self, message: str) -> None:
         """Log a warning message."""
         self.logger.warning(message)
-    
+
     def debug(self, message):
         """Log a debug message"""
         if DEBUG:

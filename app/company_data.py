@@ -1,8 +1,11 @@
+"""Base class for storing company data"""
+
 from app.util import calculate_completion_percentage
 
 class CompanyData:
     """Class for holding any company data"""
     class Company():
+        """Subclass for holding information about the company itself"""
         def __init__(self):
             self.country = ""
             self.name = ""
@@ -22,7 +25,9 @@ class CompanyData:
             self.status = None
 
     class Representatives:
+        """Subclass to hold information about the representatives"""
         class Representative:
+            """Subclass to hold information about a single representative"""
             def __init__(self):
                 self.city = ""
                 self.country = ""
@@ -33,12 +38,14 @@ class CompanyData:
                 self.date_of_birth = ""
                 self.phone = ""
                 self.email = ""
-        
+
         def __init__(self):
             self.people = []
 
     class Owners:
+        """Subclass to hold information about the company owners (>25% equity)"""
         class Owner:
+            """Subclass to hold information about a single owner (>25% equity)"""
             def __init__(self):
                 self.city = ""
                 self.country = ""
@@ -56,40 +63,44 @@ class CompanyData:
             self.people = []
 
     class Capital:
+        """Subclass to hold information about the companies capital"""
         def __init__(self):
             self.total_amount = 0
             self.total_shares = 0
             self.currency = ""
-    
+
     def __init__(self):
         self.company = self.Company()
         self.representatives = self.Representatives()
         self.owners = self.Owners()
         self.capital = self.Capital()
-    
-    def from_chatgpt(data):
-        """Map ChatGPT's response to a CompanyData object (only works with the current OPENAI_RESPONSE_FORMAT)"""
-        self = CompanyData()
-        self.company.name =             data["company"]["name"]
-        self.company.address =          data["company"]["address"]
-        self.company.city =             data["company"]["city"]
-        self.company.postal_code =      data["company"]["postal_code"]
-        self.company.street =           data["company"]["street"]
-        self.company.legal_form =       data["company"]["legal_form"]
-        self.company.purpose =          data["company"]["purpose"]
-        self.company.id =               data["company"]["german_company_registration_number"]
-        self.company.register_court =   data["company"]["register_court"]
-        self.company.register_number =  data["company"]["register_number"]
-        self.company.country =          data["company"]["country"]
-        self.company.register_type =    data["company"]["register_type"]
-        self.company.support_phone =    data["company"]["support_phone"]
-        self.company.support_email =    data["company"]["support_email"]
-        self.company.status =           data["company"]["status"]
-        self.company.industry_codes =   data["company"]["industry_codes"]
 
-        for person in data["representatives"]:
-            representative = self.Representatives.Representative()
-            
+    def from_chatgpt(self=None, data=None):
+        """Map ChatGPT's response to a CompanyData object 
+        (only works with the current OPENAI_RESPONSE_FORMAT)"""
+        new_company_data = CompanyData() if not self else self
+        if not data:
+            return
+        new_company_data.company.name =             data["company"]["name"]
+        new_company_data.company.address =          data["company"]["address"]
+        new_company_data.company.city =             data["company"]["city"]
+        new_company_data.company.postal_code =      data["company"]["postal_code"]
+        new_company_data.company.street =           data["company"]["street"]
+        new_company_data.company.legal_form =       data["company"]["legal_form"]
+        new_company_data.company.purpose =          data["company"]["purpose"]
+        new_company_data.company.id =               data["company"]["german_company_registration_number"]
+        new_company_data.company.register_court =   data["company"]["register_court"]
+        new_company_data.company.register_number =  data["company"]["register_number"]
+        new_company_data.company.country =          data["company"]["country"]
+        new_company_data.company.register_type =    data["company"]["register_type"]
+        new_company_data.company.support_phone =    data["company"]["support_phone"]
+        new_company_data.company.support_email =    data["company"]["support_email"]
+        new_company_data.company.status =           data["company"]["status"]
+        new_company_data.company.industry_codes =   data["company"]["industry_codes"]
+
+        for person in data.get("representatives"):
+            representative = new_company_data.Representatives.Representative()
+
             representative.city =           person["city"]
             representative.country =        person["country"]
             representative.street =         person["street"]
@@ -100,10 +111,10 @@ class CompanyData:
             representative.phone =          person["phone"]
             representative.email =          person["email"]
 
-            self.representatives.people.append(representative)
-        
-        for person in data["owners"]:
-            owner = self.Owners.Owner()
+            new_company_data.representatives.people.append(representative)
+
+        for person in data.get("owners"):
+            owner = new_company_data.Owners.Owner()
 
             owner.city =                person["city"]
             owner.country =             person["country"]
@@ -117,34 +128,35 @@ class CompanyData:
             owner.shares_percentage =   person["shares_percentage"]
             owner.shares_nominal =      person["shares_nominal"]
 
-            self.owners.people.append(owner)
-        
-        self.capital.total_amount = data["capital"]["total_amount"]
-        self.capital.total_shares = data["capital"]["total_shares"]
-        self.capital.currency =     data["capital"]["currency"]
+            new_company_data.owners.people.append(owner)
 
-        return self
-    
-    def from_openregister_details(data):
+        new_company_data.capital.total_amount = data["capital"]["total_amount"]
+        new_company_data.capital.total_shares = data["capital"]["total_shares"]
+        new_company_data.capital.currency =     data["capital"]["currency"]
+
+        return new_company_data
+
+    def from_openregister_details(self=None, data=None):
         """Map the response data from openregister/details to a CompanyData object"""
-        print(data)
-        self = CompanyData()
-        self.company.name =             data["name"]["name"]
-        self.company.address =          data["address"]["formatted_value"]
-        self.company.city =             data["address"]["city"]
-        self.company.postal_code =      data["address"]["postal_code"]
-        self.company.street =           data["address"]["street"]
-        self.company.legal_form =       data["legal_form"]
-        self.company.purpose =          data.get("purpose")["purpose"] if data.get("purpose") else ""
-        self.company.id =               data["id"]
-        self.company.register_court =   data["register"]["register_court"]
-        self.company.register_number =  data["register"]["register_number"]
-        self.company.country =          data["address"]["country"]
-        self.company.register_type =    data["register"]["register_type"]
-        self.company.status =           data["status"]
+        new_company_data = CompanyData() if not self else self
+        if not data:
+            return
+        new_company_data.company.name =             data["name"]["name"]
+        new_company_data.company.address =          data["address"]["formatted_value"]
+        new_company_data.company.city =             data["address"]["city"]
+        new_company_data.company.postal_code =      data["address"]["postal_code"]
+        new_company_data.company.street =           data["address"]["street"]
+        new_company_data.company.legal_form =       data["legal_form"]
+        new_company_data.company.purpose =          data.get("purpose")["purpose"] if data.get("purpose") else ""
+        new_company_data.company.id =               data["id"]
+        new_company_data.company.register_court =   data["register"]["register_court"]
+        new_company_data.company.register_number =  data["register"]["register_number"]
+        new_company_data.company.country =          data["address"]["country"]
+        new_company_data.company.register_type =    data["register"]["register_type"]
+        new_company_data.company.status =           data["status"]
 
-        for person in data["representation"]:
-            representative = self.Representatives.Representative()
+        for person in data.get("representation"):
+            representative = new_company_data.Representatives.Representative()
 
             representative.role = person.get("role")
             representative.name = person.get("name")
@@ -157,20 +169,20 @@ class CompanyData:
                 representative.country = person["legal_person"].get("country")
                 representative.date_of_birth = person["legal_person"].get("date_of_birth")
 
-            self.representatives.people.append(representative)
-        
+            new_company_data.representatives.people.append(representative)
+
         if data.get("capital"):
-            self.capital.total_amount = data["capital"].get("amount")
-            self.capital.currency =     data["capital"].get("currency")
+            new_company_data.capital.total_amount = data["capital"].get("amount")
+            new_company_data.capital.currency =     data["capital"].get("currency")
 
-        return self
+        return new_company_data
 
 
-    def from_openregister_owners(data):
+    def from_openregister_owners(self=None, data: list=None):
         """Map the response data from openregister/owners to a CompanyData object"""
-        self = CompanyData()
+        new_company_data = CompanyData() if not new_company_data else new_company_data
         for person in data:
-            owner = self.owners.Owner()
+            owner = new_company_data.owners.Owner()
 
             owner.role =                person.get("relation_type")
             owner.shares_nominal =      person.get("nominal_share")
@@ -184,31 +196,32 @@ class CompanyData:
                 owner.city =    person["legal_person"].get("city")
                 owner.country = person["legal_person"].get("country")
                 owner.name =    person["legal_person"].get("name")
-            
-            self.owners.people.append(owner)
-        
-        return self
-    
+
+            new_company_data.owners.people.append(owner)
+
+        return new_company_data
+
     def cleanup(self):
+        """Clean up the data by removing any unfilled owners/representatives"""
         new_owners = []
         for owner in self.owners.people:
             if calculate_completion_percentage(owner) > 0:
                 new_owners.append(owner)
-        
+
         new_representatives = []
         for representative in self.representatives.people:
             if calculate_completion_percentage(representative) > 0:
                 new_representatives.append(representative)
-        
+
         self.owners.people = new_owners
         self.representatives.people = new_representatives
 
     def to_dict(self) -> dict:
         """Turn the CompanyData object into a JSON-like dict for serialization"""
         self.cleanup()
-        D = {}
-        D["company"] = self.company.__dict__
-        D["representatives"] = [person.__dict__ for person in self.representatives.people]
-        D["owners"] = [person.__dict__ for person in self.owners.people]
-        D["capital"] = self.capital.__dict__
-        return D
+        return_dict = {}
+        return_dict["company"] = self.company.__dict__
+        return_dict["representatives"] = [person.__dict__ for person in self.representatives.people]
+        return_dict["owners"] = [person.__dict__ for person in self.owners.people]
+        return_dict["capital"] = self.capital.__dict__
+        return return_dict

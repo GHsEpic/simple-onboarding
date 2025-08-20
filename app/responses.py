@@ -1,4 +1,5 @@
-from app.config import OPENAI_RESPONSE_FORMAT
+"""Response types for clients and API"""
+
 from app.company_data import CompanyData
 
 class ClientResponse:
@@ -20,10 +21,10 @@ class APIResponse:
         self.status_code = status_code
         self.message = message
         self.data = data if data else CompanyData()
-    
-    
+
+
     def to_dict(self) -> dict:
-        """Convert the response to a dictionary.""" # Converts the response to a dictionary to be serialized
+        """Convert the response to a dictionary.""" # Conversion needed for serialization
         return {
             "status_code": self.status_code,
             "message": self.message,

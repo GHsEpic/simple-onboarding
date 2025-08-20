@@ -1,21 +1,25 @@
-import os, io
+"""Google API client class"""
+
+import os
+import io
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build, MediaFileUpload
 from googleapiclient.http import MediaIoBaseUpload
-from app.clients.BaseClient import BaseClient
+from app.clients.base_client import BaseClient
 from app.responses import ClientResponse
 from app.config import CREDENTIALS
-from app.autoLogging import AutoLogger
+from app.auto_logging import AutoLogger
 
 
 class GoogleClient(BaseClient):
     """GoogleClient class to handle Google Drive and Docs operations."""
     def __init__(self, token=None, credentials=None) -> None:
+        super().__init__()
         self.token = token
-        self.credentials = credentials                                                                                   
-        self.SCOPES = [                                             # Google API scopes for Drive and Docs
+        self.credentials = credentials
+        self.SCOPES = [                                # Google API scopes for Drive and Docs
             'https://www.googleapis.com/auth/drive',
             'https://www.googleapis.com/auth/documents.readonly'
         ]
@@ -25,8 +29,8 @@ class GoogleClient(BaseClient):
 
     def authenticate(self) -> None:
         """Authenticate the Google client using OAuth2 credentials."""
-        if self.token:
-            self.credentials = Credentials.from_authorized_user_info(self.token, self.SCOPES) # Create credentials from token
+        if self.token: # Create credentials from token
+            self.credentials = Credentials.from_authorized_user_info(self.token, self.SCOPES)
             self.logger.debug("Created google credentials from token")
         else:
             self.logger.warn("Found no google token")
@@ -34,17 +38,23 @@ class GoogleClient(BaseClient):
         if not self.credentials or not self.credentials.valid:
             if self.credentials and self.credentials.expired and self.credentials.refresh_token:
                 self.logger.debug("Refreshing google credentials")
-                self.credentials.refresh(Request()) # Refresh the credentials if expired 
+                self.credentials.refresh(Request()) # Refresh the credentials if expired
             else:
                 self.logger.warn("Opening browser session for manual authorization")
-                flow = InstalledAppFlow.from_client_secrets_file("credentials/google_secret.json", scopes=self.SCOPES)
-                self.credentials = flow.run_local_server(port=0, access_type="offline", prompt="consent") # Open the browser on an authentication prompt, offline and consent are required for getting a refresh_token
+                flow = InstalledAppFlow.from_client_secrets_file("credentials/google_secret.json",
+                                                                 scopes=self.SCOPES)
 
-            CREDENTIALS.google_token = self.credentials.to_json()   # Update google token in global credentials
+                # Open the browser on an authentication prompt, offline and consent are required 
+                # for getting a refresh_token
+                self.credentials = flow.run_local_server(port=0, access_type="offline",
+                                                         prompt="consent")
+
+            CREDENTIALS.google_token = self.credentials.to_json()   # Update google token
             self.logger.debug("Succesfully updated google token globally")
 
     def upload_pdf(self, file_path: str) -> str:
-        """Upload a PDF file to Google Drive, convert it to a Google Doc and return the document ID."""
+        """Upload a PDF file to Google Drive, convert it to a Google Doc 
+        and return the document ID."""
         drive_service = build('drive', 'v3', credentials=self.credentials) # Build the Drive service
 
         file_metadata = {                           # Metadata for the file to be uploaded
@@ -78,8 +88,9 @@ class GoogleClient(BaseClient):
         ).execute()
 
         return file.get('id') # Return the file ID of the uploaded document
-    
+
     def delete_file(self, doc_id: str) -> None:
+        """Delete a file from docs by id"""
         drive_service = build('drive', 'v3', credentials=self.credentials) # Build the Drive service
         drive_service.files().delete(fileId=doc_id).execute() # Delete the document by ID
 
@@ -97,8 +108,8 @@ class GoogleClient(BaseClient):
                         text += element['textRun'].get('content', '')
 
         return text
-    
-    def extract_text_from_pdf(self, file_path: str | os.PathLike) -> str: # All-in-one method to extract text from a PDF file
+
+    def extract_text_from_pdf(self, file_path: str | os.PathLike) -> str:
         """Extract text from a PDF file by uploading it to Google Drive,
           converting it to a Google Doc, and extracting the text."""
         try:
@@ -108,7 +119,7 @@ class GoogleClient(BaseClient):
         except:
             return ""
         return text
-    
+
     def __call__(self, file_stream: io.BytesIO) -> str:
         """Extract text from a PDF file stream."""
         try:
