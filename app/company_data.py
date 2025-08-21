@@ -138,9 +138,9 @@ class CompanyData:
 
     def from_openregister_details(self=None, data=None):
         """Map the response data from openregister/details to a CompanyData object"""
-        new_company_data = CompanyData() if not self else self
+        new_company_data = CompanyData()
         if not data:
-            return
+            return CompanyData()
         new_company_data.company.name =             data["name"]["name"]
         new_company_data.company.address =          data["address"]["formatted_value"]
         new_company_data.company.city =             data["address"]["city"]
@@ -180,7 +180,9 @@ class CompanyData:
 
     def from_openregister_owners(self=None, data: list=None):
         """Map the response data from openregister/owners to a CompanyData object"""
-        new_company_data = CompanyData() if not new_company_data else new_company_data
+        if not data:
+            return CompanyData()
+        new_company_data = CompanyData()
         for person in data:
             owner = new_company_data.owners.Owner()
 

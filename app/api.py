@@ -32,10 +32,6 @@ class API:
         if CLIENTS.openregister.available:
             self.openregister_client = OpenregisterClient(token=CREDENTIALS.openregister)
 
-    def __call__(self, *args, **kwargs):
-        self.logger.warn(*args, **kwargs)
-        return
-
     def run(self) -> None:
         """Run the FastAPI application."""
         self.logger.info("Running API")
@@ -43,6 +39,11 @@ class API:
 
     def setup_routes(self) -> None:
         """Set up API routes."""
+
+        @self.app.get("/")
+        async def health():
+            return {"status": "ok"}
+        
         self.logger.info("Setting up routes")
         @self.app.get("/dataByDUNS/{DUNS}")
         async def get_data_from_duns(DUNS) -> dict:

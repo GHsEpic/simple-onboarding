@@ -93,13 +93,13 @@ class OpenregisterClient(BaseClient):
         """Get basic company details"""
         self.logger.debug(f"Getting details of company {company_id}")
         data = self.make_openregister_request(f"https://api.openregister.de/v1/company/{company_id}", "GET")
-        return CompanyData.from_openregister_details(data) if data else CompanyData()
+        return CompanyData.from_openregister_details(data=data) if data else CompanyData()
 
     def get_company_owners(self, company_id: str) -> CompanyData:
         """Get company ownership information"""
         self.logger.debug(f"Getting owners of company {company_id}")
         data = self.make_openregister_request(f"https://api.openregister.de/v1/company/{company_id}/owners", "GET") # Use the owners endpoint instead of shareholders since the docs say to do so
-        return CompanyData.from_openregister_owners(data["owners"]) if data else CompanyData()
+        return CompanyData.from_openregister_owners(data=data["owners"]) if data else CompanyData()
 
     def validate_existence(self, company_name: str, company_id: str = "") -> bool:
         """Validate that the company is registered in the german Handelsregister"""
