@@ -35,7 +35,7 @@ class API:
     def run(self) -> None:
         """Run the FastAPI application."""
         self.logger.info("Running API")
-        uvicorn.run(self.app, host="127.0.0.1", port=8000)
+        uvicorn.run(self.app, host="127.0.0.1", port=80)
 
     def setup_routes(self) -> None:
         """Set up API routes."""

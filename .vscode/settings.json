@@ -1,4 +1,5 @@
 {
     "python-envs.pythonProjects": [],
-    "python.defaultInterpreterPath": ".venv/bin/python"
+    "python.defaultInterpreterPath": ".venv/bin/python",
+    "makefile.configureOnOpen": false
 }
